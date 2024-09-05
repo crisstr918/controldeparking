@@ -1,0 +1,83 @@
+LIBRARY IEEE;
+USE ieee.std_logic_1164.all;
+use ieee.std_logic_unsigned.all;
+use ieee.std_logic_arith.all;
+
+entity controladora is
+ port( clock, resetn: in std_logic;
+			start, adress,siguiente, comprar, cupo_max, indtecla,excede:in std_logic;
+			bill, completo: in std_logic;
+			rese40 ,entecla, enbill, ldbill,eth,rw,pasar: OUT STD_LOGIC:='0';
+			resetecla: out std_logic:='1');--se reinicia solo si resetecla es igual a cero'0'.
+			
+end controladora;
+architecture comp of controladora is
+	type estado is (a,b,c,d,e,f,g,h,i,j,k,l,m,n);
+	signal y :estado;
+	
+	begin 
+	process (resetn, clock)
+		begin
+			if resetn ='0' then y<=a;
+			elsif (clock'event and clock='1') then 
+				case y is 
+					when a=>  if start ='1' then y<= b; else y<= a;end if;
+					when b=>  if start ='0' then y<= c; else y<= b; end if;
+					when c=> if adress ='1' then y<=d ; else y<= c;end if;--alguna direccion
+					when d=> if siguiente ='1' then y<= m; 
+								else 	
+									if comprar='1' then y<= f;
+									else y<=d;end if;                 ---espera el boton siguiente o comprar
+								end if;                                 
+					when m=> if siguiente='0' then y<= e; else y<= m;end if;--antirrebote de boton siguiente
+					when e => if cupo_max ='1' then y<= d; else y<= j;end if;          ---para que pregunte si desea comprar---(next)
+					when j=> if indtecla='1' then 
+									IF siguiente='1' then y<=n;else y<= j;end if;
+								else y<= j;end if;
+					when n => if siguiente ='1' then y<= n; else y<=k; end if;
+					
+					when k=> if excede='1' then y<=d; else y<= l;end if;   --si ingreso bien el numero o desea comprar,
+					when l=> y<=c;                                  --espera por una direccion.
+					when f=>  if comprar='0' then y<= g; else y<=f;end if;--- compra
+					
+					
+					when g=> if bill='1'then y<=h; else y<=g;end if; ---antirrebote de billete.
+					when h=> if bill='0' then y<= i; else y<=h; end if;--- se cuenta el billete
+					when i=> if completo ='1' then y<=e; else y<= g; end if;-- verifica el cupo
+				end case ;
+			end if;
+	end process;
+	salidas: process( y, start, adress,siguiente, comprar, cupo_max, indtecla,excede,bill, completo)
+		
+		begin 
+					rese40<='0'; entecla<='0';resetecla<='1'; enbill<='0'; ldbill<='0';eth<='0';rw<='0';pasar<='0';
+
+			case y is--- 4 donde
+				when d => resetecla<='0';--reinicio el registro del valor que sale del  teclado 
+				
+				when e=> resetecla<='0';--por seguridad el valor del teclado es cero la ramm siempre esta leyendo
+			
+				when k=> if excede='0'then entecla<= '1';end if;
+				when l=>  rw<='1'; pasar<='1';-- se pasa.
+				
+				
+				when f=> enbill<='1';ldbill<='1';--carga el dato a 0 la cuenta de los billetes.
+				
+				when h=> if bill='0' then enbill<='1';end if; --cuenta despues de antirrebote de comprar.
+				
+				
+				when i=> 
+							if completo='1' then 	
+									eth<='1'; 
+									rese40<='1';
+									rw<= '1';
+									
+									end if;  
+				when others=>  rese40<='0'; entecla<='0';resetecla<='1'; enbill<='0'; ldbill<='0';eth<='0';rw<='0';pasar<='0';
+			end case;
+	end process;
+	end comp; 
+	
+		
+				--codificado para switch de 4 ..estado c y d acepta usuarios(codigo,id,etc.) , 
+		
