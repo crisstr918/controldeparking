@@ -1,0 +1,9 @@
+ENLACE DE MIRO:
+
+https://miro.com/welcomeonboard/VFU5Zk9YQ0tpODUwSW9EcnhJTzViemc3Mk5uajhkR21qRWZZWEExVWNnRlI4dnJ4UlZ1VWVVbnJ6azlVRGRpZHwzNDU4NzY0NTc0MTMwMTgwOTE5fDI=?share_link_id=636174206479
+
+
+
+en acceso simulacion: 
+wavefrome 6 -7 resultados de simulaciones de asm, y de máquina completa.
+otros respecto a simulaciones de prueba para contador de billetes, escritura en la ram.
